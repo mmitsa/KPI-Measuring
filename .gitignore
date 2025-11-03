@@ -1,0 +1,273 @@
+# نظام قياس الأداء الوظيفي - Government Performance Management System
+# .gitignore
+
+# ====================
+# Operating System
+# ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ====================
+# IDEs and Editors
+# ====================
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+.vscode-test/
+
+# JetBrains IDEs (IntelliJ, WebStorm, Rider, etc.)
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# ====================
+# Node.js / Frontend
+# ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+.nuxt/
+.cache/
+.parcel-cache/
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Package manager lock files (keep only one)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ====================
+# .NET / Backend
+# ====================
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Visual Studio profiler
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# NuGet
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Entity Framework
+*.edmx.diagram
+*.edmx.sql
+
+# ====================
+# Database
+# ====================
+*.mdf
+*.ldf
+*.ndf
+*.bak
+*.log
+*.sqlite
+*.db
+*.db-shm
+*.db-wal
+
+# SQL Server files
+*.mdf
+*.ldf
+*.ndf
+
+# PostgreSQL
+*.dump
+
+# ====================
+# Logs
+# ====================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ====================
+# Temporary files
+# ====================
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ====================
+# Security & Secrets
+# ====================
+
+# DO NOT commit these files!
+*.pfx
+*.p12
+*.key
+*.pem
+*.crt
+*.cer
+secrets.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.json
+!appsettings.json
+
+# Azure
+local.settings.json
+.azuredevops/
+
+# AWS
+.aws/
+
+# Google Cloud
+.gcloud/
+
+# ====================
+# Docker
+# ====================
+docker-compose.override.yml
+.dockerignore
+
+# ====================
+# Testing
+# ====================
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
+
+# ====================
+# Documentation
+# ====================
+*.pdf
+*.docx
+!docs/**/*.pdf
+!docs/**/*.docx
+
+# ====================
+# Uploads & User Files
+# ====================
+uploads/
+files/
+attachments/
+storage/
+
+# ====================
+# Backups
+# ====================
+*.bak
+*.backup
+backups/
+
+# ====================
+# CI/CD
+# ====================
+.github/workflows/*.local.yml
+.gitlab-ci.local.yml
+
+# ====================
+# Misc
+# ====================
+*.stackdump
+.sass-cache/
+*.css.map
+*.sass.map
+*.scss.map
+
+# ====================
+# Project Specific
+# ====================
+
+# Compiled assets
+public/build/
+public/hot
+public/storage
+
+# Reports (generated)
+reports/*.pdf
+reports/*.xlsx
+!reports/.gitkeep
+
+# Integration Queue (runtime)
+integration-queue/
+
+# Audit Logs (archived)
+audit-logs-archive/
