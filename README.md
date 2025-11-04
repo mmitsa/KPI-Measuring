@@ -87,6 +87,146 @@
 
 ---
 
+## 📸 Screenshots & Live Demo
+
+<div dir="rtl">
+
+### صفحة تسجيل الدخول | Login Page
+
+> **للحصول على لقطات الشاشة:** اتبع الدليل في [`SCREENSHOTS_GUIDE.md`](./SCREENSHOTS_GUIDE.md)
+
+<!-- Placeholder for login screenshot -->
+**قريباً:** لقطة شاشة لصفحة تسجيل الدخول
+<!-- ![Login Page](./docs/screenshots/01-login-page.png) -->
+
+**الميزات:**
+- تصميم حديث بألوان العلم السعودي
+- دعم RTL كامل للعربية
+- حقول username & password
+- عرض الحسابات التجريبية
+
+---
+
+### لوحة تحكم الموظف | Employee Dashboard
+
+<!-- Placeholder for dashboard screenshot -->
+**قريباً:** لقطة شاشة للوحة التحكم
+<!-- ![Employee Dashboard](./docs/screenshots/03-employee-dashboard.png) -->
+
+**الميزات:**
+- بطاقات إحصائيات ملونة
+- قائمة الأهداف مع نسب الإنجاز
+- قائمة التقييمات مع الدرجات
+- قائمة جانبية تفاعلية
+
+---
+
+### إدارة الأهداف | Goals Management
+
+<!-- Placeholder for goals screenshot -->
+**قريباً:** لقطة شاشة لإدارة الأهداف
+<!-- ![Goals Section](./docs/screenshots/04-goals-section.png) -->
+
+**الميزات:**
+- عرض جميع الأهداف
+- Progress bars لكل هدف
+- Status chips ملونة
+- أوزان الأهداف (يجب أن يكون المجموع 100%)
+
+---
+
+### التقييمات | Evaluations
+
+<!-- Placeholder for evaluations screenshot -->
+**قريباً:** لقطة شاشة للتقييمات
+<!-- ![Evaluations](./docs/screenshots/08-evaluations-section.png) -->
+
+**الميزات:**
+- عرض الفترة ونوع التقييم
+- الدرجة النهائية (0-5)
+- التصنيف (ممتاز، فوق المتوقع، إلخ)
+- Chips ملونة للحالات
+
+</div>
+
+---
+
+## 🎬 Live Demos
+
+<!-- Placeholders for GIF demos -->
+
+### Demo 1: تسجيل الدخول | Login Flow (5-10s)
+
+**قريباً:** GIF لعملية تسجيل الدخول
+<!-- ![Login Flow](./docs/demos/demo-login-flow.gif) -->
+
+### Demo 2: جولة في لوحة التحكم | Dashboard Tour (15-20s)
+
+**قريباً:** GIF لجولة في لوحة التحكم
+<!-- ![Dashboard Tour](./docs/demos/demo-dashboard-tour.gif) -->
+
+### Demo 3: رحلة المستخدم الكاملة | Complete Workflow (30-45s)
+
+**قريباً:** GIF للرحلة الكاملة
+<!-- ![Complete Workflow](./docs/demos/demo-complete-workflow.gif) -->
+
+---
+
+## 🚀 How to Add Screenshots
+
+Follow these steps to add screenshots and GIFs:
+
+### Quick Start (30 Minutes)
+
+```bash
+# 1. Run preparation script
+bash scripts/prepare-screenshots.sh
+# Or on Windows: scripts\prepare-screenshots.bat
+
+# 2. Start backend
+cd backend/src/PerformanceSystem.API
+dotnet run
+
+# 3. Start frontend
+cd frontend
+npm run dev
+
+# 4. Follow screenshot guide
+# Open: SCREENSHOTS_GUIDE.md
+# Capture 8 screenshots + 3 GIFs
+
+# 5. Add files to repo
+cp ~/Desktop/*.png docs/screenshots/
+cp ~/Desktop/*.gif docs/demos/
+
+# 6. Update README (uncomment image links above)
+
+# 7. Commit
+git add docs/screenshots docs/demos README.md
+git commit -m "docs: add platform screenshots and demos"
+git push
+```
+
+### Tools Needed
+
+- **Screenshots:** Browser built-in tools (F12 or Windows+Shift+S)
+- **GIFs (Windows):** [ScreenToGif](https://www.screentogif.com/) (Free)
+- **GIFs (Mac):** [LICEcap](https://www.cockos.com/licecap/) (Free)
+- **GIFs (Linux):** Peek (`sudo apt install peek`)
+
+### Test Accounts
+
+Use these accounts to explore the platform:
+
+| Username | Password | Role | Arabic |
+|----------|----------|------|--------|
+| `admin` | `Admin@123` | Admin | مسؤول النظام |
+| `hr.manager` | `Hr@123` | HR | موارد بشرية |
+| `it.manager` | `Manager@123` | Manager | مدير |
+| `john.doe` | `Employee@123` | Employee | موظف |
+
+---
+
 ## 🎯 الميزات الرئيسية
 
 ### إدارة الأهداف الذكية (SMART Goals)
