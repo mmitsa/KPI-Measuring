@@ -25,6 +25,7 @@
     "@mui/icons-material": "^5.15.11",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
+    "@emotion/cache": "^11.11.0",
     "@reduxjs/toolkit": "^2.2.1",
     "react-redux": "^9.1.0",
     "axios": "^1.6.7",
@@ -36,9 +37,8 @@
     "chart.js": "^4.4.1",
     "react-chartjs-2": "^5.2.0",
     "date-fns": "^3.3.1",
-    "react-toastify": "^10.0.4",
-    "react-query": "^3.39.3",
-    "zustand": "^4.5.1"
+    "stylis": "^4.3.1",
+    "stylis-plugin-rtl": "^2.1.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.1",
