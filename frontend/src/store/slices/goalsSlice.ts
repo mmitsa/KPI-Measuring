@@ -64,6 +64,40 @@ export const createGoal = createAsyncThunk(
   }
 );
 
+export const fetchGoalById = createAsyncThunk(
+  'goals/fetchById',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      return await goalsService.getGoalById(id);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.Message || 'فشل جلب بيانات الهدف');
+    }
+  }
+);
+
+export const updateGoal = createAsyncThunk(
+  'goals/update',
+  async ({ id, data }: { id: string; data: any }, { rejectWithValue }) => {
+    try {
+      return await goalsService.updateGoal(id, data);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.Message || 'فشل تحديث الهدف');
+    }
+  }
+);
+
+export const deleteGoal = createAsyncThunk(
+  'goals/delete',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      await goalsService.deleteGoal(id);
+      return id;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.Message || 'فشل حذف الهدف');
+    }
+  }
+);
+
 export const updateGoalProgress = createAsyncThunk(
   'goals/updateProgress',
   async ({ id, progress }: { id: string; progress: number }, { rejectWithValue }) => {
@@ -114,6 +148,54 @@ const goalsSlice = createSlice({
         state.list.unshift(action.payload);
       })
       .addCase(createGoal.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Fetch goal by ID
+      .addCase(fetchGoalById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchGoalById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentGoal = action.payload;
+      })
+      .addCase(fetchGoalById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Update goal
+      .addCase(updateGoal.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateGoal.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.list.findIndex((g) => g.id === action.payload.id);
+        if (index !== -1) {
+          state.list[index] = action.payload;
+        }
+        if (state.currentGoal?.id === action.payload.id) {
+          state.currentGoal = action.payload;
+        }
+      })
+      .addCase(updateGoal.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Delete goal
+      .addCase(deleteGoal.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteGoal.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = state.list.filter((g) => g.id !== action.payload);
+        if (state.currentGoal?.id === action.payload) {
+          state.currentGoal = null;
+        }
+      })
+      .addCase(deleteGoal.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       })

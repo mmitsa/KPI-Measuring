@@ -15,6 +15,7 @@ import {
   Assessment as EvaluationIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchGoals } from '@/store/slices/goalsSlice';
@@ -23,6 +24,7 @@ import MainLayout from '@/components/layout/MainLayout';
 
 export default function EmployeeDashboard() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { list: goals, loading: goalsLoading } = useAppSelector((state) => state.goals);
@@ -154,6 +156,7 @@ export default function EmployeeDashboard() {
                 variant="contained"
                 startIcon={<AddIcon />}
                 sx={{ borderRadius: 2 }}
+                onClick={() => navigate('/employee/goals')}
               >
                 {t('goals.create')}
               </Button>
