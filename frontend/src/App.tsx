@@ -10,6 +10,9 @@ import LoginPage from '@/pages/auth/LoginPage';
 import EmployeeDashboard from '@/pages/employee/EmployeeDashboard';
 import GoalsPage from '@/pages/employee/GoalsPage';
 import EvaluationsPage from '@/pages/employee/EvaluationsPage';
+import ManagerDashboard from '@/pages/manager/ManagerDashboard';
+import TeamGoalsPage from '@/pages/manager/TeamGoalsPage';
+import TeamEvaluationsPage from '@/pages/manager/TeamEvaluationsPage';
 
 function App() {
   const { language } = useAppSelector((state) => state.ui);
@@ -56,11 +59,31 @@ function App() {
 
         {/* Manager Routes */}
         <Route
-          path="/manager/*"
+          path="/manager"
           element={
             <PrivateRoute>
               <RoleGuard allowedRoles={['Manager', 'HR', 'Admin']}>
-                <div>Manager Dashboard (Coming Soon)</div>
+                <ManagerDashboard />
+              </RoleGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/manager/team-goals"
+          element={
+            <PrivateRoute>
+              <RoleGuard allowedRoles={['Manager', 'HR', 'Admin']}>
+                <TeamGoalsPage />
+              </RoleGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/manager/team-evaluations"
+          element={
+            <PrivateRoute>
+              <RoleGuard allowedRoles={['Manager', 'HR', 'Admin']}>
+                <TeamEvaluationsPage />
               </RoleGuard>
             </PrivateRoute>
           }
