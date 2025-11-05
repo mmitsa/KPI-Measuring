@@ -51,6 +51,17 @@ export const fetchEvaluations = createAsyncThunk(
   }
 );
 
+export const fetchEvaluationById = createAsyncThunk(
+  'evaluations/fetchById',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      return await evaluationsService.getEvaluationById(id);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.Message || 'فشل جلب بيانات التقييم');
+    }
+  }
+);
+
 const evaluationsSlice = createSlice({
   name: 'evaluations',
   initialState,
@@ -64,6 +75,7 @@ const evaluationsSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch evaluations
       .addCase(fetchEvaluations.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -76,6 +88,19 @@ const evaluationsSlice = createSlice({
         state.pageSize = action.payload.pageSize;
       })
       .addCase(fetchEvaluations.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
+      // Fetch evaluation by ID
+      .addCase(fetchEvaluationById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchEvaluationById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentEvaluation = action.payload;
+      })
+      .addCase(fetchEvaluationById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
       });
