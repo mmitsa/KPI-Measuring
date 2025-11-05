@@ -370,22 +370,59 @@ psql -U postgres -d performance_db -f database/setup.sql
 ## 📖 التوثيق
 
 ### التخطيط والتصميم
+- [📋 خطة المشروع الكاملة](./docs/PROJECT_PLAN.md) - نظرة شاملة على المشروع
+- [📝 المهام التفصيلية](./docs/TASKS.md) - 159 مهمة موزعة على 9 مراحل
+- [🔄 مخططات سير العمل](./docs/WORKFLOWS.md) - 13 workflow مفصل
+- [📅 المعالم الزمنية](./docs/MILESTONES.md) - الجدول الزمني والتقدم
 - [📋 خطة التنفيذ الكاملة](./IMPLEMENTATION_PLAN.md) - خطة 8 أسابيع للمشروع
 - [🎨 خطة تطوير Frontend](./docs/FRONTEND_PLAN.md) - خطة شاملة لتطوير الواجهة (60+ صفحة)
 - [⚡ دليل البدء السريع - Frontend](./frontend/QUICKSTART.md) - ابدأ التطوير بسرعة
 - [📊 خريطة الطريق 2025-2027](./ROADMAP.md)
 
-### البنية التقنية
+### البنية التقنية والمعمارية
 - [🗄️ مخطط قاعدة البيانات](./docs/database/ERD.md) - 19 جدول مع SQL
+- [📊 ERD تفاعلي](./docs/database/DATABASE_ERD_VISUAL.md) - مخططات Mermaid تفاعلية
 - [🔌 توثيق API](./docs/api/API_SPECIFICATION.md) - 200+ نقطة نهاية
+- [📡 Postman Collection](./docs/api/Performance_System_Postman_Collection.json) - مجموعة API جاهزة
+- [💡 أمثلة API](./docs/api/API_EXAMPLES.md) - أمثلة شاملة لاستخدام API
 - [⚙️ دليل إعداد Backend](./backend/SETUP.md) - إعداد شامل لـ .NET
 - [🏗️ دليل البناء](./BUILD.md) - Docker + Local Development
+- [🏛️ قرارات معمارية (ADRs)](./docs/architecture/) - 4 ADRs موثقة
+- [👨‍💻 دليل المطورين](./docs/DEVELOPMENT_GUIDE.md) - معايير البرمجة والتطوير
+
+### النشر والعمليات
+- [🚀 دليل النشر](./docs/deployment/DEPLOYMENT_GUIDE.md) - خطوات النشر الكاملة
+- [✅ قائمة التحقق للإنتاج](./docs/deployment/PRODUCTION_CHECKLIST.md) - 100+ عنصر للتحقق
+- [🔄 خطة التراجع](./docs/deployment/ROLLBACK_PLAN.md) - إجراءات الطوارئ
+- [📊 إعداد المراقبة](./docs/deployment/MONITORING_SETUP.md) - Prometheus, Grafana, ELK
+- [🐳 Docker Compose](./docker-compose.complete.yml) - بيئة كاملة بأمر واحد
+
+### الأمن والامتثال
+- [🔒 قائمة التحقق الأمني](./docs/security/SECURITY_CHECKLIST.md) - 200+ عنصر أمني
+- [🛡️ حماية البيانات](./docs/security/DATA_PRIVACY.md) - NCA و PDPL compliance
+- [🚨 الاستجابة للحوادث](./docs/security/INCIDENT_RESPONSE.md) - خطة الطوارئ الأمنية
+
+### الاختبار
+- [🎯 استراتيجية الاختبار](./docs/testing/TESTING_STRATEGY.md) - Unit, Integration, E2E
+- [📋 حالات الاختبار](./docs/testing/TEST_CASES.md) - اختبارات تفصيلية
+- [🔄 سيناريوهات E2E](./docs/testing/E2E_SCENARIOS.md) - اختبارات شاملة
+
+### CI/CD والأتمتة
+- [⚙️ Backend CI/CD](./.github/workflows/backend-ci.yml) - اختبار وبناء Backend
+- [🎨 Frontend CI/CD](./.github/workflows/frontend-ci.yml) - اختبار وبناء Frontend
+- [🔒 فحص أمني](./.github/workflows/security-scan.yml) - CodeQL, Trivy, SAST
+- [🚀 النشر التلقائي](./.github/workflows/deploy.yml) - نشر متعدد البيئات
+
+### عمليات الصيانة
+- [🔧 حل المشاكل](./docs/TROUBLESHOOTING.md) - مشاكل شائعة وحلولها
+- [⚡ تحسين الأداء](./docs/PERFORMANCE_OPTIMIZATION.md) - Backend, Frontend, DB
 
 ### الأدلة الإضافية
 - [👤 دليل المستخدم](./docs/user-guides/README.md)
-- [🔒 دليل الأمان](./docs/security/README.md)
 - [🤝 دليل المساهمة](./CONTRIBUTING.md)
 - [❓ الأسئلة الشائعة](./FAQ.md)
+- [🛠️ سكريبت الإعداد](./scripts/setup-dev.sh) - إعداد بيئة التطوير تلقائياً
+- [📝 ملف البيئة النموذجي](./.env.example) - Environment variables
 
 ## 🧪 الاختبار
 
