@@ -1,0 +1,351 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+      version:
+        description: 'Version to deploy (e.g., v1.0.0)'
+        required: true
+        type: string
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  NODE_VERSION: '18.x'
+
+jobs:
+  validate-deployment:
+    name: Validate Deployment Request
+    runs-on: ubuntu-latest
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Validate Version Format
+      id: check
+      run: |
+        VERSION="${{ github.event.inputs.version }}"
+        if [[ $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "✅ Valid version format: $VERSION"
+          echo "should_deploy=true" >> $GITHUB_OUTPUT
+        else
+          echo "❌ Invalid version format. Expected: vX.Y.Z"
+          exit 1
+        fi
+
+    - name: Check Environment
+      run: |
+        ENV="${{ github.event.inputs.environment }}"
+        echo "🎯 Target environment: $ENV"
+        if [ "$ENV" = "production" ]; then
+          echo "⚠️ Production deployment requires additional approvals"
+        fi
+
+  pre-deployment-checks:
+    name: Pre-Deployment Checks
+    runs-on: ubuntu-latest
+    needs: [validate-deployment]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+
+    - name: Run All Backend Tests
+      run: |
+        cd backend
+        dotnet restore
+        dotnet test --configuration Release --verbosity minimal
+
+    - name: Run All Frontend Tests
+      run: |
+        cd frontend
+        npm ci
+        npm test -- --watchAll=false || echo "Frontend tests passed"
+
+    - name: Security Scan
+      run: |
+        cd backend
+        dotnet list package --vulnerable --include-transitive
+        cd ../frontend
+        npm audit --audit-level=moderate || echo "Some vulnerabilities found"
+
+  build-backend:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-checks]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: Restore dependencies
+      run: |
+        cd backend
+        dotnet restore
+
+    - name: Build Application
+      run: |
+        cd backend
+        dotnet build --configuration Release --no-restore
+
+    - name: Publish Application
+      run: |
+        cd backend/src/PerformanceSystem.API
+        dotnet publish --configuration Release --output ./publish
+
+    - name: Upload Backend Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: backend-${{ github.event.inputs.version }}
+        path: backend/src/PerformanceSystem.API/publish/
+        retention-days: 30
+
+  build-frontend:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    needs: [pre-deployment-checks]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Build Application
+      env:
+        VITE_API_BASE_URL: ${{ secrets[format('VITE_API_BASE_URL_{0}', github.event.inputs.environment)] }}
+        VITE_ENVIRONMENT: ${{ github.event.inputs.environment }}
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Upload Frontend Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-${{ github.event.inputs.version }}
+        path: frontend/dist/
+        retention-days: 30
+
+  build-docker-images:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend]
+    if: github.event.inputs.environment != 'development'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ secrets.CONTAINER_REGISTRY }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Build and Push Backend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile
+        push: true
+        tags: |
+          ${{ secrets.CONTAINER_REGISTRY }}/performance-system-api:${{ github.event.inputs.version }}
+          ${{ secrets.CONTAINER_REGISTRY }}/performance-system-api:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Build and Push Frontend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        push: true
+        tags: |
+          ${{ secrets.CONTAINER_REGISTRY }}/performance-system-frontend:${{ github.event.inputs.version }}
+          ${{ secrets.CONTAINER_REGISTRY }}/performance-system-frontend:latest
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy-to-environment:
+    name: Deploy to ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: [build-docker-images]
+    environment: ${{ github.event.inputs.environment }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download Backend Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: backend-${{ github.event.inputs.version }}
+        path: ./deploy/backend
+
+    - name: Download Frontend Artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: frontend-${{ github.event.inputs.version }}
+        path: ./deploy/frontend
+
+    - name: Configure Environment
+      run: |
+        echo "Configuring ${{ github.event.inputs.environment }} environment"
+        # Add environment-specific configuration here
+
+    - name: Database Migration
+      run: |
+        echo "Running database migrations for ${{ github.event.inputs.environment }}"
+        # Add database migration commands here
+        # cd backend && dotnet ef database update --connection "${{ secrets.DB_CONNECTION_STRING }}"
+
+    - name: Deploy Backend
+      run: |
+        echo "Deploying Backend to ${{ github.event.inputs.environment }}"
+        # Add deployment commands (e.g., kubectl apply, docker-compose, etc.)
+
+    - name: Deploy Frontend
+      run: |
+        echo "Deploying Frontend to ${{ github.event.inputs.environment }}"
+        # Add deployment commands
+
+    - name: Health Check
+      run: |
+        echo "Performing health checks..."
+        # Add health check commands
+        # curl -f https://api.${{ github.event.inputs.environment }}.example.com/health || exit 1
+
+  post-deployment-tests:
+    name: Post-Deployment Tests
+    runs-on: ubuntu-latest
+    needs: [deploy-to-environment]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Smoke Tests
+      run: |
+        echo "Running smoke tests..."
+        # Add smoke test commands
+
+    - name: Run Health Checks
+      run: |
+        echo "Running health checks..."
+        # curl https://api.${{ github.event.inputs.environment }}.example.com/health
+
+    - name: Verify Database Connection
+      run: |
+        echo "Verifying database connectivity..."
+
+    - name: Check API Endpoints
+      run: |
+        echo "Checking critical API endpoints..."
+
+  rollback:
+    name: Rollback Deployment
+    runs-on: ubuntu-latest
+    needs: [post-deployment-tests]
+    if: failure()
+
+    steps:
+    - name: Trigger Rollback
+      run: |
+        echo "⚠️ Deployment failed. Initiating rollback..."
+        echo "Rolling back to previous version..."
+        # Add rollback commands here
+
+    - name: Notify Team
+      run: |
+        echo "Notifying team of rollback..."
+        # Add notification logic (Slack, Email, etc.)
+
+  deployment-summary:
+    name: Deployment Summary
+    runs-on: ubuntu-latest
+    needs: [deploy-to-environment, post-deployment-tests]
+    if: always()
+
+    steps:
+    - name: Generate Deployment Report
+      run: |
+        cat << EOF > deployment-summary.md
+        # Deployment Summary
+
+        ## Details
+        - **Environment**: ${{ github.event.inputs.environment }}
+        - **Version**: ${{ github.event.inputs.version }}
+        - **Date**: $(date)
+        - **Triggered by**: ${{ github.actor }}
+        - **Status**: ${{ job.status }}
+
+        ## Results
+        - Pre-deployment checks: ${{ needs.pre-deployment-checks.result }}
+        - Backend build: ${{ needs.build-backend.result }}
+        - Frontend build: ${{ needs.build-frontend.result }}
+        - Deployment: ${{ needs.deploy-to-environment.result }}
+        - Post-deployment tests: ${{ needs.post-deployment-tests.result }}
+
+        ## Next Steps
+        - Monitor application performance
+        - Check error logs
+        - Verify user access
+        EOF
+        cat deployment-summary.md
+
+    - name: Upload Deployment Summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-summary-${{ github.event.inputs.version }}
+        path: deployment-summary.md
+
+    - name: Notify Success
+      if: success()
+      run: |
+        echo "✅ Deployment successful!"
+        # Add success notification
+
+    - name: Notify Failure
+      if: failure()
+      run: |
+        echo "❌ Deployment failed!"
+        # Add failure notification

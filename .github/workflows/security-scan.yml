@@ -1,0 +1,284 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run security scan every Monday at 9:00 AM
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  dependency-scan-backend:
+    name: Backend Dependency Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Restore dependencies
+      run: |
+        cd backend
+        dotnet restore
+
+    - name: Vulnerability Scan
+      run: |
+        cd backend
+        dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerability-report.txt
+
+    - name: Check for vulnerabilities
+      run: |
+        cd backend
+        if grep -q "has the following vulnerable packages" vulnerability-report.txt; then
+          echo "⚠️ Vulnerabilities found!"
+          cat vulnerability-report.txt
+          exit 1
+        else
+          echo "✅ No known vulnerabilities found"
+        fi
+
+    - name: Upload Vulnerability Report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: backend-vulnerability-report
+        path: backend/vulnerability-report.txt
+
+  dependency-scan-frontend:
+    name: Frontend Dependency Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Run npm audit
+      run: |
+        cd frontend
+        npm audit --audit-level=moderate --json > npm-audit-report.json || true
+        npm audit --audit-level=moderate || echo "Vulnerabilities found"
+
+    - name: Upload Audit Report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-audit-report
+        path: frontend/npm-audit-report.json
+
+  codeql-analysis:
+    name: CodeQL Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp', 'javascript' ]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+
+    - name: Setup .NET (for C#)
+      if: matrix.language == 'csharp'
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Build C# Code
+      if: matrix.language == 'csharp'
+      run: |
+        cd backend
+        dotnet build --configuration Release
+
+    - name: Setup Node.js (for JavaScript)
+      if: matrix.language == 'javascript'
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+
+    - name: Build JavaScript Code
+      if: matrix.language == 'javascript'
+      run: |
+        cd frontend
+        npm ci
+        npm run build
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: TruffleHog Secret Scan
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: ${{ github.event.repository.default_branch }}
+        head: HEAD
+
+  sast-analysis:
+    name: Static Application Security Testing
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Semgrep
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: >-
+          p/security-audit
+          p/secrets
+          p/owasp-top-ten
+          p/csharp
+          p/typescript
+
+  docker-security-scan:
+    name: Docker Image Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build Backend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile
+        push: false
+        tags: performance-system-api:scan
+        load: true
+
+    - name: Scan Backend Image with Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: performance-system-api:scan
+        format: 'sarif'
+        output: 'trivy-backend-results.sarif'
+
+    - name: Upload Trivy Results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-backend-results.sarif'
+
+    - name: Build Frontend Image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        push: false
+        tags: performance-system-frontend:scan
+        load: true
+
+    - name: Scan Frontend Image with Trivy
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: performance-system-frontend:scan
+        format: 'sarif'
+        output: 'trivy-frontend-results.sarif'
+
+    - name: Upload Frontend Trivy Results
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: 'trivy-frontend-results.sarif'
+
+  license-compliance:
+    name: License Compliance Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18.x'
+
+    - name: Check Frontend Licenses
+      run: |
+        cd frontend
+        npm ci
+        npx license-checker --summary || echo "License checker not available"
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Check Backend Licenses
+      run: |
+        cd backend
+        dotnet restore
+        dotnet list package --include-transitive > licenses.txt
+        cat licenses.txt
+
+  security-report:
+    name: Generate Security Report
+    runs-on: ubuntu-latest
+    needs: [dependency-scan-backend, dependency-scan-frontend, codeql-analysis, secret-scanning]
+    if: always()
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Generate Summary Report
+      run: |
+        echo "# Security Scan Summary" > security-report.md
+        echo "Date: $(date)" >> security-report.md
+        echo "" >> security-report.md
+        echo "## Scan Results" >> security-report.md
+        echo "- Backend Dependency Scan: ${{ needs.dependency-scan-backend.result }}" >> security-report.md
+        echo "- Frontend Dependency Scan: ${{ needs.dependency-scan-frontend.result }}" >> security-report.md
+        echo "- CodeQL Analysis: ${{ needs.codeql-analysis.result }}" >> security-report.md
+        echo "- Secret Scanning: ${{ needs.secret-scanning.result }}" >> security-report.md
+        cat security-report.md
+
+    - name: Upload Security Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-summary-report
+        path: security-report.md

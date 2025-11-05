@@ -1,0 +1,1187 @@
+{
+  "info": {
+    "name": "Government Performance Management System",
+    "_postman_id": "performance-system-v1",
+    "description": "Complete API collection for the Government Performance Management System\n\nنظام قياس الأداء الوظيفي - مجموعة API كاملة",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://localhost:5001/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refreshToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employeeId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Login - Standard",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('accessToken', response.accessToken);",
+                  "    pm.environment.set('refreshToken', response.refreshToken);",
+                  "    pm.environment.set('userId', response.user.userId);",
+                  "    pm.environment.set('employeeId', response.user.employeeId);",
+                  "    console.log('✅ Login successful');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"john.doe\",\n  \"password\": \"Employee@123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('accessToken', response.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{refreshToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "2. Goals Management",
+      "item": [
+        {
+          "name": "Get My Goals",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/goals/my?status=&year=2025",
+              "host": ["{{baseUrl}}"],
+              "path": ["goals", "my"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "year",
+                  "value": "2025"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Goal by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/goals/:goalId",
+              "host": ["{{baseUrl}}"],
+              "path": ["goals", ":goalId"],
+              "variable": [
+                {
+                  "key": "goalId",
+                  "value": "{{goalId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Goal",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('goalId', response.goalId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"تطوير نظام إدارة الأداء\",\n  \"description\": \"تصميم وتطوير نظام متكامل لقياس وإدارة الأداء الوظيفي\",\n  \"type\": \"Strategic\",\n  \"category\": \"تقنية المعلومات\",\n  \"weight\": 30,\n  \"targetValue\": \"100%\",\n  \"measurementUnit\": \"نسبة مئوية\",\n  \"startDate\": \"2025-01-01\",\n  \"endDate\": \"2025-12-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/goals",
+              "host": ["{{baseUrl}}"],
+              "path": ["goals"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Goal",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"تطوير نظام إدارة الأداء المحدّث\",\n  \"description\": \"تصميم وتطوير نظام متكامل لقياس وإدارة الأداء الوظيفي مع ميزات إضافية\",\n  \"weight\": 35\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/goals/:goalId",
+              "host": ["{{baseUrl}}"],
+              "path": ["goals", ":goalId"],
+              "variable": [
+                {
+                  "key": "goalId",
+                  "value": "{{goalId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Goal Progress",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progressPercent\": 65,\n  \"notes\": \"تم إكمال مرحلة التصميم والبدء بالتطوير\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/goals/:goalId/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["goals", ":goalId", "progress"],
+              "variable": [
+                {
+                  "key": "goalId",
+                  "value": "{{goalId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Goal (Manager)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"هدف واضح ومحدد، موافق عليه\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/goals/:goalId/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["goals", ":goalId", "approve"],
+              "variable": [
+                {
+                  "key": "goalId",
+                  "value": "{{goalId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Goal",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/goals/:goalId",
+              "host": ["{{baseUrl}}"],
+              "path": ["goals", ":goalId"],
+              "variable": [
+                {
+                  "key": "goalId",
+                  "value": "{{goalId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Team Goals (Manager)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/goals/team?employeeId=&status=&year=2025",
+              "host": ["{{baseUrl}}"],
+              "path": ["goals", "team"],
+              "query": [
+                {
+                  "key": "employeeId",
+                  "value": ""
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                },
+                {
+                  "key": "year",
+                  "value": "2025"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "3. Evaluations",
+      "item": [
+        {
+          "name": "Get My Evaluations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/evaluations/my?period=2025&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["evaluations", "my"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Evaluation by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/evaluations/:evaluationId",
+              "host": ["{{baseUrl}}"],
+              "path": ["evaluations", ":evaluationId"],
+              "variable": [
+                {
+                  "key": "evaluationId",
+                  "value": "{{evaluationId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Evaluation (Manager)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('evaluationId', response.evaluationId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"period\": \"2025\",\n  \"evaluationType\": \"Annual\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/evaluations",
+              "host": ["{{baseUrl}}"],
+              "path": ["evaluations"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Evaluation Scores",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"goalsScore\": 4.5,\n  \"behaviorScore\": 4.2,\n  \"initiativesScore\": 4.0,\n  \"managerNotes\": \"أداء ممتاز خلال العام\",\n  \"items\": [\n    {\n      \"itemType\": \"Goal\",\n      \"refId\": \"{{goalId}}\",\n      \"title\": \"تطوير نظام إدارة الأداء\",\n      \"weight\": 30,\n      \"score\": 4.5,\n      \"notes\": \"تم إنجاز الهدف بتميز\"\n    },\n    {\n      \"itemType\": \"Competency\",\n      \"refId\": null,\n      \"title\": \"القيادة\",\n      \"weight\": 20,\n      \"score\": 4.2,\n      \"notes\": \"مهارات قيادية جيدة\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/evaluations/:evaluationId/scores",
+              "host": ["{{baseUrl}}"],
+              "path": ["evaluations", ":evaluationId", "scores"],
+              "variable": [
+                {
+                  "key": "evaluationId",
+                  "value": "{{evaluationId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Finalize Evaluation",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/evaluations/:evaluationId/finalize",
+              "host": ["{{baseUrl}}"],
+              "path": ["evaluations", ":evaluationId", "finalize"],
+              "variable": [
+                {
+                  "key": "evaluationId",
+                  "value": "{{evaluationId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Approve Evaluation (HR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"تقييم دقيق وعادل، معتمد\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/evaluations/:evaluationId/approve",
+              "host": ["{{baseUrl}}"],
+              "path": ["evaluations", ":evaluationId", "approve"],
+              "variable": [
+                {
+                  "key": "evaluationId",
+                  "value": "{{evaluationId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Team Evaluations (Manager)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/evaluations/team?period=2025&status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["evaluations", "team"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                },
+                {
+                  "key": "status",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "4. Objections",
+      "item": [
+        {
+          "name": "Get My Objections",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/objections/my?status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["objections", "my"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Submit Objection",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"evaluationId\": \"{{evaluationId}}\",\n  \"reason\": \"عدم موافقة على الدرجة النهائية\",\n  \"details\": \"أعتقد أن التقييم لم يعكس الجهد المبذول خلال العام\",\n  \"attachmentUrl\": null\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/objections",
+              "host": ["{{baseUrl}}"],
+              "path": ["objections"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Decide on Objection (HR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"Accepted\",\n  \"decisionNotes\": \"تم مراجعة الاعتراض وقبوله، سيتم تعديل الدرجة\",\n  \"newFinalScore\": 3.8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/objections/:objectionId/decide",
+              "host": ["{{baseUrl}}"],
+              "path": ["objections", ":objectionId", "decide"],
+              "variable": [
+                {
+                  "key": "objectionId",
+                  "value": "{{objectionId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Pending Objections (HR)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/objections/pending?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["objections", "pending"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "5. PIPs (Performance Improvement Plans)",
+      "item": [
+        {
+          "name": "Get My PIPs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pips/my?status=",
+              "host": ["{{baseUrl}}"],
+              "path": ["pips", "my"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get PIP by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pips/:pipId",
+              "host": ["{{baseUrl}}"],
+              "path": ["pips", ":pipId"],
+              "variable": [
+                {
+                  "key": "pipId",
+                  "value": "{{pipId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create PIP (Manager/HR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"evaluationId\": \"{{evaluationId}}\",\n  \"targetedSkills\": [\"إدارة الوقت\", \"حل المشكلات\"],\n  \"plan\": {\n    \"objectives\": [\"تحسين مهارات إدارة الوقت\"],\n    \"actions\": [\"حضور دورة إدارة الوقت\"],\n    \"timeline\": \"3 أشهر\"\n  },\n  \"startDate\": \"2025-01-01\",\n  \"dueDate\": \"2025-03-31\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pips",
+              "host": ["{{baseUrl}}"],
+              "path": ["pips"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update PIP Progress",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progressNotes\": \"تم إكمال 50% من الخطة، حضر الدورة التدريبية\",\n  \"status\": \"InProgress\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pips/:pipId/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["pips", ":pipId", "progress"],
+              "variable": [
+                {
+                  "key": "pipId",
+                  "value": "{{pipId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Close PIP",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resultNotes\": \"تحسن ملحوظ في الأداء، تم إغلاق الخطة بنجاح\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pips/:pipId/close",
+              "host": ["{{baseUrl}}"],
+              "path": ["pips", ":pipId", "close"],
+              "variable": [
+                {
+                  "key": "pipId",
+                  "value": "{{pipId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "6. Reports",
+      "item": [
+        {
+          "name": "Employee Performance Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/employee/:employeeId?period=2025&format=pdf",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "employee", ":employeeId"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                },
+                {
+                  "key": "format",
+                  "value": "pdf"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "employeeId",
+                  "value": "{{employeeId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Team Performance Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/team?period=2025&format=excel",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "team"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                },
+                {
+                  "key": "format",
+                  "value": "excel"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Promotion Candidates Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/promotion-candidates?period=2025&minScore=3.5",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "promotion-candidates"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                },
+                {
+                  "key": "minScore",
+                  "value": "3.5"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Department Performance Report",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/department/:departmentId?period=2025",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "department", ":departmentId"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "departmentId",
+                  "value": "{{departmentId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Organization Performance Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/reports/organization-summary?period=2025",
+              "host": ["{{baseUrl}}"],
+              "path": ["reports", "organization-summary"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "7. Dashboards",
+      "item": [
+        {
+          "name": "Employee Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboards/employee",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboards", "employee"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Manager Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboards/manager",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboards", "manager"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "HR Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboards/hr?period=2025",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboards", "hr"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Executive Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboards/executive?period=2025",
+              "host": ["{{baseUrl}}"],
+              "path": ["dashboards", "executive"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2025"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "8. Notifications",
+      "item": [
+        {
+          "name": "Get My Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?isRead=false&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "isRead",
+                  "value": "false"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:notificationId/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", ":notificationId", "read"],
+              "variable": [
+                {
+                  "key": "notificationId",
+                  "value": "{{notificationId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/mark-all-read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "mark-all-read"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "9. Training",
+      "item": [
+        {
+          "name": "Get My Training Results",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/training/my-results?year=2025",
+              "host": ["{{baseUrl}}"],
+              "path": ["training", "my-results"],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2025"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Training Result (System/HR)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"courseId\": \"TRN-2025-001\",\n  \"courseName\": \"إدارة الوقت الفعّال\",\n  \"courseCategory\": \"مهارات شخصية\",\n  \"scorePercent\": 88,\n  \"isPassed\": true,\n  \"completedAt\": \"2025-03-15\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/training/results",
+              "host": ["{{baseUrl}}"],
+              "path": ["training", "results"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "10. Admin",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/users?page=1&limit=50&search=&role=&isActive=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "search",
+                  "value": ""
+                },
+                {
+                  "key": "role",
+                  "value": ""
+                },
+                {
+                  "key": "isActive",
+                  "value": "true"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"employeeId\": \"{{employeeId}}\",\n  \"username\": \"new.user\",\n  \"email\": \"new.user@gov.sa\",\n  \"roles\": [\"Employee\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Assign Role to User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"roleId\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users/:userId/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "users", ":userId", "roles"],
+              "variable": [
+                {
+                  "key": "userId",
+                  "value": "{{userId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/audit-logs?page=1&limit=100&action=&entity=&userId=",
+              "host": ["{{baseUrl}}"],
+              "path": ["admin", "audit-logs"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "100"
+                },
+                {
+                  "key": "action",
+                  "value": ""
+                },
+                {
+                  "key": "entity",
+                  "value": ""
+                },
+                {
+                  "key": "userId",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
