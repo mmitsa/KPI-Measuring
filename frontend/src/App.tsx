@@ -8,6 +8,7 @@ import RoleGuard from '@/components/auth/RoleGuard';
 // Pages
 import LoginPage from '@/pages/auth/LoginPage';
 import EmployeeDashboard from '@/pages/employee/EmployeeDashboard';
+import GoalsPage from '@/pages/employee/GoalsPage';
 
 function App() {
   const { language } = useAppSelector((state) => state.ui);
@@ -22,11 +23,21 @@ function App() {
 
         {/* Employee Routes */}
         <Route
-          path="/employee/*"
+          path="/employee"
           element={
             <PrivateRoute>
               <RoleGuard allowedRoles={['Employee', 'Manager', 'HR', 'Admin']}>
                 <EmployeeDashboard />
+              </RoleGuard>
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/employee/goals"
+          element={
+            <PrivateRoute>
+              <RoleGuard allowedRoles={['Employee', 'Manager', 'HR', 'Admin']}>
+                <GoalsPage />
               </RoleGuard>
             </PrivateRoute>
           }
